@@ -10,7 +10,7 @@ const Dashboard = () => {
         setToggle(!toggle)
     }
     return (
-        <div className="container-fluid bg-secondary min-vh-100 ">
+        <div className="container-fluid min-vh-100 " style={{ backgroundColor: '#545454' }}>
           {" "}
           <div className="row ">
             {" "}
