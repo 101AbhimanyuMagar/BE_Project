@@ -54,7 +54,7 @@ function Sidebar({ setSelectedComponent }) {
           onClick={() => setSelectedComponent('Periods')}
         >
          <i className="bi bi-clock-history fs-5 me-3"></i>{" "}
-          <span>Periods</span>{" "}
+          <span>Lectures</span>{" "}
         </a>{" "}
         <a
           className="list-group-item py-2"

@@ -5,13 +5,13 @@ import { onSnapshot, collection, getDocs, addDoc, deleteDoc, doc } from 'firebas
 
 const Courses = () => {
   const [newCourse, setNewCourse] = useState("")
-  const [newProfessors, setNewProfessor] = useState("")
+  const [newCourseLoad, setNewCourseLoad] = useState("")
   const [newCourseCode, setNewCourseCode] = useState("")
   const [courses, setCourse] = useState([]);
   const coursesCollectionRef = collection(db, "Courses")
 
   const createCourse = async() =>{
-      await addDoc(coursesCollectionRef, {courseName: newCourse,courseCode: newCourseCode,professors: newProfessors })
+      await addDoc(coursesCollectionRef, {courseName: newCourse,courseCode: newCourseCode,courseLoad: newCourseLoad })
   }
 
   
@@ -55,11 +55,12 @@ const Courses = () => {
         </div>
         <div className="col-sm  px-4">
           <input
-            type="text"
+            type="number"
             className="form-control"
-            onChange={(e) => setNewProfessor(e.target.value)}
-            placeholder="Professors"
-            aria-label="Professors"
+            onChange={(e) => setNewCourseLoad(e.target.value)}
+            placeholder="Course Load"
+            aria-label="Course Load"
+            min="0"
           />
         </div>
         <div className="col-sm px-4">
@@ -79,7 +80,7 @@ const Courses = () => {
               <th scope="col">id</th>
               <th scope="col">Course Name</th>
               <th scope="col">Course Code</th>
-              <th scope="col">Professors</th>
+              <th scope="col">Couse Load</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -89,7 +90,7 @@ const Courses = () => {
                 <th scope="row">{index + 1}</th>
                 <td>{course.courseName}</td>
                 <td>{course.courseCode}</td>
-                <td>{course.professors}</td>
+                <td>{course.courseLoad}</td>
                 <td>
                   <button
                     className="btn btn-danger"
