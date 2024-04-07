@@ -1,49 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../src/firebase.jsx';
-import { onSnapshot, collection, addDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { onSnapshot, collection, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
 const Periods = () => {
   const [newStartTime, setNewStartTime] = useState('');
   const [newEndTime, setNewEndTime] = useState('');
-  const [Periods, setPeriods] = useState([]);
+  const [lectureSequence, setLectureSequence] = useState('');
+  const [periods, setPeriods] = useState([]);
 
-  const PeriodsCollectionRef = collection(db, 'Periods');
+  const periodsCollectionRef = collection(db, 'Periods');
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(':');
     let formattedHours = parseInt(hours, 10);
+    let period = 'AM';
 
     if (formattedHours >= 12) {
       if (formattedHours > 12) {
         formattedHours -= 12;
       }
+      period = 'PM';
     } else if (formattedHours === 0) {
       formattedHours = 12;
     }
 
-    return `${formattedHours.toString().padStart(2, '0')}:${minutes}`;
+    return `${formattedHours.toString().padStart(2, '0')}:${minutes} ${period}`;
   };
 
   const createLecturePeriod = async () => {
-    // Check if both start and end times are provided
-    if (!newStartTime || !newEndTime) {
-      alert('Please fill in both start time and end time.');
+    if (!newStartTime || !newEndTime || !lectureSequence || isNaN(lectureSequence) || lectureSequence <= 0) {
+      alert('Please fill in all fields with a positive numerical value for Lecture Sequence.');
       return;
     }
 
-    // Convert the entered time to a 12-hour format
     const formattedStartTime = formatTime(newStartTime);
     const formattedEndTime = formatTime(newEndTime);
 
-    // Add a new lecture period
-    await addDoc(PeriodsCollectionRef, {
+    const newPeriod = {
       startTime: formattedStartTime,
       endTime: formattedEndTime,
-    });
+      lectureSequence: parseInt(lectureSequence),
+    };
 
-    // Clear form fields after creating lecture period
+    setPeriods([...periods, newPeriod]);
+
+    await addDoc(periodsCollectionRef, newPeriod);
+
     setNewStartTime('');
     setNewEndTime('');
+    setLectureSequence('');
   };
 
   const deleteLecturePeriod = async (id) => {
@@ -52,15 +57,15 @@ const Periods = () => {
   };
 
   useEffect(() => {
-    // Subscribe to real-time updates using onSnapshot
     const unsubscribePeriods = onSnapshot(
-      query(collection(db, 'Periods'), orderBy('startTime', 'asc')),
+      periodsCollectionRef,
       (snapshot) => {
-        setPeriods(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        const fetchedPeriods = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        const sortedPeriods = fetchedPeriods.sort((a, b) => a.lectureSequence - b.lectureSequence);
+        setPeriods(sortedPeriods);
       }
     );
 
-    // Cleanup on component unmount
     return () => unsubscribePeriods();
   }, []);
 
@@ -87,6 +92,17 @@ const Periods = () => {
             aria-label='End Time'
           />
         </div>
+        <div className='col-sm px-2'>
+          <input
+            type='number'
+            className='form-control'
+            value={lectureSequence}
+            onChange={(e) => setLectureSequence(e.target.value)}
+            placeholder='Lecture Sequence'
+            aria-label='Lecture Sequence'
+            min="1" // Ensure only positive values
+          />
+        </div>
         <div className='col-sm px-4'>
           <button
             type='button'
@@ -101,18 +117,18 @@ const Periods = () => {
         <table className='table table-hover table-sm mt-4 rounded-circle'>
           <thead className='thead-dark '>
             <tr>
-              <th scope='col'>id</th>
+              <th scope='col'>Lecture Sequence</th>
               <th scope='col'>Start Time</th>
               <th scope='col'>End Time</th>
               <th scope='col'>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {Periods.map((period, index) => (
+            {periods.map((period, index) => (
               <tr key={index}>
-                <th scope='row'>{index + 1}</th>
-                <td>{formatTime(period.startTime)}</td>
-                <td>{formatTime(period.endTime)}</td>
+                <td>{period.lectureSequence}</td>
+                <td>{period.startTime}</td>
+                <td>{period.endTime}</td>
                 <td>
                   <button
                     className='btn btn-danger'

@@ -10,7 +10,7 @@ import  Courses  from "./components/Contents/Courses.jsx"
 import  Professors  from "./components/Contents/Professors.jsx"
 import  Years  from "./components/Contents/Years.jsx"
 import  Periods  from "./components/Contents/Periods.jsx"
-import Algo from './components/Temp/algo.jsx'
+
 
 const App = () => {
   return (
@@ -21,7 +21,7 @@ const App = () => {
           <Route path='/login' element={<Login/>}/>
           <Route path='/register' element={<Register/>}/>
           <Route path='/dashboard' element={<Dashboard/>}/>
-          <Route path='/algo' element={<Algo/>}/>
+         
           {/* <Routes>
         <Route path="/" element={<DashboardContent/>}></Route>
         <Route path="/" element={<RoomsContent/>}></Route>

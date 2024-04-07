@@ -2,6 +2,13 @@ import { db } from "../../firebase.jsx";
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import Genetic from "genetic-js";
 
+
+const DAYS=5
+const LECTURES_PER_DAY=6
+let courseList=[]
+
+var timetableComponent=[]
+
 const GeneticAlgo = {
   generateTimetables: async () => {
     try {
@@ -14,229 +21,179 @@ const GeneticAlgo = {
         id: doc.id,
         ...doc.data(),
       }));
+
       const professors = professorsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
+      var courseToProfessor={}
+
+        for (const prof of professors) {
+          for (const course of prof.courses) {
+            var id =course.id;
+
+            const matchingCourse = courses.find(ccourse => ccourse.id === id);
+            if (matchingCourse && matchingCourse.courseCode) {
+              courseToProfessor[matchingCourse.courseCode] = prof.professorName;
+            }
+
+          }
+        }
+
+
+        generate(courses,2,7,courseToProfessor)
+
+        courseList=[]
+        generate(courses,2,6,courseToProfessor)
+
+        courseList=[]
+        generate(courses,3,7,courseToProfessor)
+        courseList=[]
+
+
+        generate(courses,3,6,courseToProfessor)
+        courseList=[]
+        generate(courses,4,7,courseToProfessor)
+        courseList=[]
+        generate(courses,4,6,courseToProfessor)
+        courseList=[]
+
+
       const rooms = roomsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(typeof courses)
-      const generatedTimetables = [];
 
-      // No need to iterate over years and semesters here
-      
-    
-      const timetable = generateWeeklyScheduleTemplate(courses, professors, rooms);
-      
-      
-      const fitRate = fitnessFunction(timetable); // Calculate initial fitness
-      
+  }catch(e){
+    console.log("Failed to fetch data")
+  }
+}
+}
 
-      // Genetic Algorithm configuration
-      const genetic = Genetic.create();
-      genetic.optimize = Genetic.Optimize.Maximize;
-      genetic.select1 = selection(timetable);
-      genetic.select2 = selection(timetable);
-      genetic.generate = generateInitialPopulation(timetable, courses, professors, rooms);
-      genetic.fitness = fitnessFunction;
-
-      const config = {
-        iterations: 10,
-        crossover: 0.8,
-        mutation: 0.1,
-        skip: 10,
-      };
-
-      const result = genetic.evolve(config);
-
-      if (!result) {
-        throw new Error("Genetic algorithm did not return a valid result.");
-      }
-
-      const formattedResult = result.map((timetable, index) => ({
-        id: index, // Add an ID for each timetable
-        timetable: JSON.stringify(timetable), // Convert timetable to a string
-      }));
-
-      // Store the generated timetable back into Firestore (optional)
-      await GeneticAlgo.storeGeneratedTimetables(formattedResult);
-
-      return formattedResult;
-    } catch (error) {
-      console.error("Error generating timetables:", error);
-      throw error;
+function generate(courses,selectedYear,sem,courseToProfessor){
+  for(let course of courses){
+    if(course.courseCode.charAt(0)==selectedYear  && course.courseCode.charAt(2)==sem){
+      courseList.push(course)
     }
-  },
-
-  async storeGeneratedTimetables(formattedResult) {
-    try {
-      const timetablesRef = collection(db, "Timetables");
-      for (const timetable of formattedResult) {
-        await addDoc(timetablesRef, timetable);
-      }
-      console.log("Timetables successfully stored in Firestore!");
-    } catch (error) {
-      console.error("Error storing timetables:", error);
-    }
-  },
-};
-
-function generateWeeklyScheduleTemplate(courses, professors, rooms) {
-  const startTime = "09:15"; // Adjust start time as needed
-  const endTime = "17:30"; // Adjust end time as needed
-  const interval = 1; // Interval in hours (30 minutes)
-
-  const timePeriods = [];
-  let currentTime = startTime;
-  while (currentTime < endTime) {
-    timePeriods.push(currentTime);
-    currentTime = (parseFloat(currentTime) + interval).toFixed(2);
   }
 
-  const timetable = [];
-  timetable.push(["Time Period", "Mon", "Tue", "Wed", "Thu", "Fri"]);
+  // Example usage
+  try{
+  const populationSize = 100;
+  const generations = 1000;
+  const bestTimetable = geneticAlgorithm(populationSize, generations,courseList);
 
-  timePeriods.forEach((timePeriod) => {
-    const row = [timePeriod];
-    for (let i = 0; i < 5; i++) {
-      // Add empty slots for each day (courseName, professorName, roomName)
-      row.push({ courseName: "", professorName: "", roomName: "" });
-    }
-    timetable.push(row);
-  });
+  const timeTableWithProfName=[]
 
+  for(var subject of bestTimetable){
+    timeTableWithProfName.push({
+      [subject.courseName] : courseToProfessor[subject.courseCode]
+    })
+  }
+
+  timetableComponent.push(timeTableWithProfName)
+
+  }catch(e){
+    console.log(e)
+  }
+}
+// Function to generate a random timetable based on the courseList
+function generateRandomTimetable(courseList) {
+  let timetable = [];
+  for (let day = 0; day < DAYS; day++) {
+      let dayCourses = [];
+      let shuffledCourses = courseList.sort(() => 0.5 - Math.random());
+      for (let lecture = 0; lecture < LECTURES_PER_DAY; lecture++) {
+          dayCourses.push(shuffledCourses[lecture % shuffledCourses.length]);
+      }
+      timetable = timetable.concat(dayCourses);
+  }
   return timetable;
 }
 
-// Selection function
-const selection = (timetable) => {
-  const selected = [];
-  for (let i = 0; i < 10; i++) {
-    selected.push(randomTimetable(timetable)); // Select based on fitness
+
+
+function initializePopulation(populationSize, courseList) {
+  let population = [];
+  for (let i = 0; i < populationSize; i++) {
+      population.push(generateRandomTimetable(courseList));
   }
-  return selected;
-};
-
-// Function to randomly select a valid timetable based on fitness
-// ... previous code
-
-// Function to randomly select a valid timetable based on fitness
-function randomTimetable(timetable) {
-  const fitnessScores = timetable.map(fitnessFunction); // Calculate fitness for each timetable
-  const totalFitness = fitnessScores.reduce((sum, score) => sum + score, 0);
-
-  // Weighted random selection based on fitness
-  let randomValue = Math.random() * totalFitness;
-  let selectedIndex = 0;
-  while (randomValue > 0) {
-    randomValue -= fitnessScores[selectedIndex];
-    selectedIndex++;
-  }
-
-  return timetable[selectedIndex - 1]; // Account for 0-based indexing
+  return population;
 }
 
-// Generate function (creates initial population)
-const generateInitialPopulation = (timetable, courses, professors, rooms) => {
-  const population = [];
-  for (let i = 0; i < 10; i++) {
-    const newTimetable = [...timetable]; // Create a copy of the template
 
-    // Assign courses, professors, and rooms with constraints and limited attempts
-    for (let dayIndex = 0; dayIndex < newTimetable.length; dayIndex++) {
-      for (let periodIndex = 0; periodIndex < newTimetable[dayIndex].length - 1; periodIndex++) {
-        let validAssignment = false;
-        let attempts = 0;
-        const maxAttempts = 10; // Adjust as needed
+// Fitness Function: Simplified to count the number of unique courses per day.
+function evaluateFitness(timetable) {
+  let fitness = 0;
+  for (let i = 0; i < timetable.length; i += LECTURES_PER_DAY) {
+      const dayCourses = timetable.slice(i, i + LECTURES_PER_DAY);
+      const uniqueCourses = new Set(dayCourses).size;
+      fitness += uniqueCourses;
+  }
+  return fitness;
+}
 
-        while (!validAssignment && attempts < maxAttempts) {
-          const randomCourse = courses[Math.floor(Math.random() * courses.length)];
-          let randomProfessor = professors.find((professor) => professor.courses.includes(randomCourse.id));
+// Selection Function: Select two timetables based on their fitness.
+function selectTwo(population) {
+  // Simplified selection: randomly select but favor higher fitness
+  population.sort((a, b) => evaluateFitness(b) - evaluateFitness(a));
+  return [population[0], population[1]]; // This is a simplification
+}
 
-          if (!randomProfessor) {
-            console.warn("No professor found qualified for", randomCourse.courseName);
-            randomProfessor = professors[Math.floor(Math.random() * professors.length)]; // Assign a random professor as fallback
-          }
+// Crossover Function: Combine two timetables into a new one.
+function crossover(parent1, parent2) {
+  let child = [];
+  // Simple one-point crossover
+  const crossoverPoint = Math.floor(Math.random() * parent1.length);
+  child = parent1.slice(0, crossoverPoint).concat(parent2.slice(crossoverPoint));
+  return child;
+}
 
-          const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+// Mutation Function: Randomly change a course in the timetable.
+function mutate(timetable) {
+  let mutatedTimetable = [...timetable];
+  const mutationPoint = Math.floor(Math.random() * mutatedTimetable.length);
+  mutatedTimetable[mutationPoint] = courseList[Math.floor(Math.random() * courseList.length)];
+  return mutatedTimetable;
+}
 
-          // Check for conflicts before assigning
-          const isProfessorAvailable = !newTimetable.some(
-            (day) => day[periodIndex + 1].professorName === randomProfessor.professorName
-          );
-          const isRoomAvailable = !newTimetable.some(
-            (day) => day[periodIndex + 1].roomNumber === randomRoom.number
-          );
+// Main Genetic Algorithm Loop
+function geneticAlgorithm(populationSize, generations,courseList) {
+  let population = initializePopulation(populationSize, courseList);
 
-          if (randomProfessor && randomRoom && isProfessorAvailable && isRoomAvailable) {
-            newTimetable[dayIndex][periodIndex + 1].courseName = randomCourse.courseName;
-            newTimetable[dayIndex][periodIndex + 1].professorName = randomProfessor.professorName;
-            newTimetable[dayIndex][periodIndex + 1].roomName = randomRoom.roomName;
-            validAssignment = true;
-          }
+  for (let generation = 0; generation < generations; generation++) {
+      let newPopulation = [];
 
-          attempts++;
-        }
-
-        if (!validAssignment) {
-          console.warn("Failed to find valid assignment after", maxAttempts, "attempts for slot:", dayIndex + 1, ",", periodIndex + 1);
-          // Handle the case where a valid assignment couldn't be found (e.g., skip the slot or assign a placeholder)
-        }
+      while (newPopulation.length < populationSize) {
+          const [parent1, parent2] = selectTwo(population);
+          let child = crossover(parent1, parent2);
+          child = mutate(child);
+          newPopulation.push(child);
       }
-    }
 
-    population.push(newTimetable);
+      population = newPopulation;
+
+      // Evaluate the fitness of the new population and find the best
+      const bestTimetable = population.reduce((prev, current) => {
+          return (evaluateFitness(prev) > evaluateFitness(current)) ? prev : current;
+      });
+
+      var SOME_FITNESS_THRESHOLD = 20
+      // Simplified termination check: arbitrary fitness threshold
+      if (evaluateFitness(bestTimetable) >= SOME_FITNESS_THRESHOLD) {
+          console.log('Satisfactory timetable found at generation ' + generation);
+          return bestTimetable;
+      }
   }
 
-  return population;
-};
-
-const fitnessFunction = (timetable) => {
-  let fitness = 0;
-
-  // Track professor and room usage
-  const professorRooms = new Map();
-  const roomPeriods = new Map();
-
-  // Iterate through each day in the timetable
-  timetable.forEach((day) => {
-    if (!Array.isArray(day)) {
-      console.error("Invalid timetable structure. Day should be an array.");
-      return; // Skip this day if it's not an array
-    }
-
-    day.forEach((slot, periodIndex) => {
-      const { professorName, roomNumber } = slot;
-
-      // Check if the slot is empty or not
-      if (professorName && roomNumber) {
-        // Check for professor conflicts
-        if (
-          professorRooms.has(professorName) &&
-          professorRooms.get(professorName).some((usedPeriod) => usedPeriod !== periodIndex)
-        ) {
-          fitness -= 2; // Higher penalty for professor conflicts
-        } else {
-          professorRooms.set(professorName, [...(professorRooms.get(professorName) || []), periodIndex]);
-        }
-
-        // Check for room conflicts
-        if (
-          roomPeriods.has(roomNumber) &&
-          roomPeriods.get(roomNumber).includes(periodIndex)
-        ) {
-          fitness -= 1;
-        } else {
-          roomPeriods.set(roomNumber, [...(roomPeriods.get(roomNumber) || []), periodIndex]);
-        }
-      }
-    });
+  // Returning the best found if no satisfactory solution is found within the given generations
+  return population.reduce((prev, current) => {
+      return (evaluateFitness(prev) > evaluateFitness(current)) ? prev : current;
   });
-
-  return fitness;
-};
+}
 
 
-export default GeneticAlgo;
+
+
+export {GeneticAlgo,timetableComponent};
