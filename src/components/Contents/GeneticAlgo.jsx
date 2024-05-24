@@ -34,16 +34,20 @@ const GeneticAlgo = {
             }
 
            // Find all matching courses
-           const matchingCourses = courses.filter(ccourse => ccourse.id === id);
-
-           // Assign the last matching professor to courseToProfessorDiv2
-           matchingCourses.forEach(matchingCourse => {
-             if (matchingCourse.courseCode) {
-               courseToProfessorDiv2[matchingCourse.courseCode] = prof.professorName;
-             }
-           });
           }
         }
+
+        for (const course of courses) {
+          // Get the professors teaching this course
+          const matchingProfessors = professors.filter(prof => prof.courses.some(c => c.id === course.id));
+          
+          // If there are matching professors
+          if (matchingProfessors.length > 0) {
+              // Assign the last matching professor to the course code
+              const lastProfessor = matchingProfessors[0];
+              courseToProfessorDiv2[course.courseCode] = lastProfessor.professorName;
+          }
+      }
 
 
 

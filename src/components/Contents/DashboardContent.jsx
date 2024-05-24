@@ -98,11 +98,11 @@ const DashboardContent = () => {
     <div className="container">
       <h2 className="text-center text-white">Weekly Timetable</h2>
       <div className="row justify-content-center pt-2">
-        <div className="col-sm-6 text-center">
+        <div className="row justify-content-center text-center g-2">
           <button
             type="submit"
             onClick={generateTimetable}
-            className="btn btn-primary btn-lg me-4"
+            className="btn btn-primary btn-lg col-sm-4 me-2 "
           >
             Generate Timetables Sem-I
           </button>
@@ -111,7 +111,7 @@ const DashboardContent = () => {
         
             type="submit"
             onClick={generateTimetableSem2}
-            className="btn btn-primary btn-lg"
+            className="btn btn-primary btn-lg col-sm-4"
           >
             Generate Timetables Sem-II
           </button>
