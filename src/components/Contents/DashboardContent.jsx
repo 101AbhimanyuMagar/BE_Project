@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase.jsx";
+<<<<<<< HEAD
 import { GeneticAlgo, timetableComponent } from "./GeneticAlgo.jsx";
 
 var semlist = [
@@ -10,6 +11,17 @@ var semlist = [
   '3rd year DIV 2',
   '4th year DIV 1',
   '4th year DIV 2',
+=======
+import { GeneticAlgo, timetableComponent } from "./GeneticAlgo";
+
+var semlist = [
+  '2nd year Sem I',
+  '2nd year Sem II',
+  '3rd year Sem I',
+  '3rd year Sem II',
+  '4th year Sem I',
+  '4th year Sem II',
+>>>>>>> origin/master
 ];
 
 const DashboardContent = () => {
@@ -41,6 +53,7 @@ const DashboardContent = () => {
   };
 
   const generateTimetable = async () => {
+<<<<<<< HEAD
     const worker = new Worker(new URL('./GeneticWorker.js', import.meta.url), { type: 'module' });
 
     worker.onmessage = (e) => {
@@ -92,12 +105,23 @@ const DashboardContent = () => {
     // } catch (error) {
     //   console.error("Error generating timetables:", error);
     // }
+=======
+    try {
+      const generatedTimetables = await GeneticAlgo.generateTimetables(); // Generate timetables using the Genetic Algorithm
+      setTimetables(generatedTimetables);
+      setShowTimetable(true);
+      alert("Timetables generated successfully!");
+    } catch (error) {
+      console.error("Error generating timetables:", error);
+    }
+>>>>>>> origin/master
   };
 
   return (
     <div className="container">
       <h2 className="text-center text-white">Weekly Timetable</h2>
       <div className="row justify-content-center pt-2">
+<<<<<<< HEAD
         <div className="row justify-content-center text-center g-2">
           <button
             type="submit"
@@ -122,6 +146,22 @@ const DashboardContent = () => {
         <div className="">
           <h4 className="text-success">Generated Timetables</h4>
           {timetables.map((timetable, timetableIndex) => {
+=======
+        <div className="col-sm-6 text-center">
+          <button
+            type="submit"
+            onClick={generateTimetable}
+            className="btn btn-primary btn-lg "
+          >
+            Generate Timetables
+          </button>
+        </div>
+      </div>
+      {showTimetable && (
+        <div className="">
+          <h4 className="text-success">Generated Timetables</h4>
+          {timetableComponent.map((timetable, timetableIndex) => {
+>>>>>>> origin/master
             const timetable2D = convertTo2DArray(timetable);
             // Sort periods by lecture sequence
             const sortedPeriods = [...periods].sort((a, b) => a.lectureSequence - b.lectureSequence);
