@@ -9,6 +9,7 @@ import Courses from "./Contents/Courses.jsx";
 import Years from "./Contents/Years.jsx";
 import Professors from "./Contents/Professors.jsx";
 import Periods from "./Contents/Periods.jsx";
+import Logout from "./Contents/Logout.jsx";
 
 
 
@@ -25,6 +26,7 @@ function Content({ selectedComponent, Toggle }) {
       {selectedComponent === 'Years' && <Years/>}
       {selectedComponent === 'Professors' && <Professors/>}
       {selectedComponent === 'Periods' && <Periods/>}
+      {selectedComponent === 'Logout' && <Logout/>}
     </div>
    
   );
