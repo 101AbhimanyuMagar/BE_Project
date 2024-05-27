@@ -1,17 +1,8 @@
-<<<<<<< HEAD
-=======
-import { db } from "../../firebase.jsx";
-import { collection, getDocs, addDoc } from "firebase/firestore";
-import Genetic from "genetic-js";
-
->>>>>>> origin/master
-
 const DAYS=5
 const LECTURES_PER_DAY=6
 let courseList=[]
 
 var timetableComponent=[]
-<<<<<<< HEAD
 var courseToProfessor={}
 var courseToProfessorDiv2={}
 const GeneticAlgo = {
@@ -21,16 +12,6 @@ const GeneticAlgo = {
       const coursesSnapshot = CourseSnapshot;
       const professorsSnapshot = ProfessorsSnapshot;
       const roomsSnapshot = RoomsSnapshot;
-=======
-
-const GeneticAlgo = {
-  generateTimetables: async () => {
-    try {
-      // Retrieve data from Firestore collections
-      const coursesSnapshot = await getDocs(collection(db, "Courses"));
-      const professorsSnapshot = await getDocs(collection(db, "Professors"));
-      const roomsSnapshot = await getDocs(collection(db, "Rooms"));
->>>>>>> origin/master
 
       const courses = coursesSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -42,11 +23,6 @@ const GeneticAlgo = {
         ...doc.data(),
       }));
 
-<<<<<<< HEAD
-=======
-      var courseToProfessor={}
-
->>>>>>> origin/master
         for (const prof of professors) {
           for (const course of prof.courses) {
             var id =course.id;
@@ -56,7 +32,6 @@ const GeneticAlgo = {
               courseToProfessor[matchingCourse.courseCode] = prof.professorName;
             }
 
-<<<<<<< HEAD
            // Find all matching courses
           }
         }
@@ -87,29 +62,6 @@ const GeneticAlgo = {
 
 
         return timetableComponent;
-=======
-          }
-        }
-
-
-        generate(courses,2,7,courseToProfessor)
-
-        courseList=[]
-        generate(courses,2,6,courseToProfessor)
-
-        courseList=[]
-        generate(courses,3,7,courseToProfessor)
-        courseList=[]
-
-
-        generate(courses,3,6,courseToProfessor)
-        courseList=[]
-        generate(courses,4,7,courseToProfessor)
-        courseList=[]
-        generate(courses,4,6,courseToProfessor)
-        courseList=[]
-
->>>>>>> origin/master
 
       const rooms = roomsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -132,7 +84,6 @@ function generate(courses,selectedYear,sem,courseToProfessor){
   // Example usage
   try{
   const populationSize = 100;
-<<<<<<< HEAD
   const generations = 1000000;
   let bestTimetable = geneticAlgorithm(populationSize, generations,courseList);
   let bestTimetableDiv2=geneticAlgorithm(populationSize, generations,courseList);
@@ -182,26 +133,11 @@ function generate(courses,selectedYear,sem,courseToProfessor){
   timetableComponent.push(timeTableWithProfName)
   timetableComponent.push(timeTableWithProfNameDiv2)
 
-=======
-  const generations = 1000;
-  const bestTimetable = geneticAlgorithm(populationSize, generations,courseList);
-
-  const timeTableWithProfName=[]
-
-  for(var subject of bestTimetable){
-    timeTableWithProfName.push({
-      [subject.courseName] : courseToProfessor[subject.courseCode]
-    })
-  }
-
-  timetableComponent.push(timeTableWithProfName)
->>>>>>> origin/master
 
   }catch(e){
     console.log(e)
   }
 }
-<<<<<<< HEAD
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -269,13 +205,10 @@ function checkConditions(timetable){
     });
     return isValid
 }
-=======
->>>>>>> origin/master
 // Function to generate a random timetable based on the courseList
 function generateRandomTimetable(courseList) {
   let timetable = [];
   for (let day = 0; day < DAYS; day++) {
-<<<<<<< HEAD
     let dayCourses = [];
     let shuffledCourses = courseList.sort(() => 0.5 - Math.random());
     
@@ -296,24 +229,10 @@ function generateRandomTimetable(courseList) {
         }
     }
     timetable = timetable.concat(dayCourses);
-=======
-      let dayCourses = [];
-      let shuffledCourses = courseList.sort(() => 0.5 - Math.random());
-      for (let lecture = 0; lecture < LECTURES_PER_DAY; lecture++) {
-          dayCourses.push(shuffledCourses[lecture % shuffledCourses.length]);
-      }
-      timetable = timetable.concat(dayCourses);
->>>>>>> origin/master
   }
   return timetable;
 }
 
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 function initializePopulation(populationSize, courseList) {
   let population = [];
   for (let i = 0; i < populationSize; i++) {
@@ -325,7 +244,6 @@ function initializePopulation(populationSize, courseList) {
 
 // Fitness Function: Simplified to count the number of unique courses per day.
 function evaluateFitness(timetable) {
-<<<<<<< HEAD
     let fitness = 0;
     let labCounts = {};
     let lecCounts={};
@@ -417,17 +335,6 @@ function evaluateFitness(timetable) {
 }
 
 
-=======
-  let fitness = 0;
-  for (let i = 0; i < timetable.length; i += LECTURES_PER_DAY) {
-      const dayCourses = timetable.slice(i, i + LECTURES_PER_DAY);
-      const uniqueCourses = new Set(dayCourses).size;
-      fitness += uniqueCourses;
-  }
-  return fitness;
-}
-
->>>>>>> origin/master
 // Selection Function: Select two timetables based on their fitness.
 function selectTwo(population) {
   // Simplified selection: randomly select but favor higher fitness
@@ -476,11 +383,6 @@ function geneticAlgorithm(populationSize, generations,courseList) {
       var SOME_FITNESS_THRESHOLD = 20
       // Simplified termination check: arbitrary fitness threshold
       if (evaluateFitness(bestTimetable) >= SOME_FITNESS_THRESHOLD) {
-<<<<<<< HEAD
-
-=======
-          console.log('Satisfactory timetable found at generation ' + generation);
->>>>>>> origin/master
           return bestTimetable;
       }
   }
